@@ -1,0 +1,339 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Home</title>
+</head>
+<body>
+    <div class="container">
+
+
+        <button class="btn btn-dark" type="button" id="logout">Log Out</button>
+        <button class='btn  btn-primary ' data-toggle='modal' data-target='#addModal'>Add New Country</button>
+        <div id="response"></div>
+        <br />
+        <script src="~/lib/jquery/dist/jquery.js"></script>
+
+        <script>
+
+            $(function () {
+
+                $('.table').DataTable();
+
+            });
+
+        </script>
+        <table   id="tb1">
+            <thead>
+                <tr>
+                    <th>
+                        id
+                    </th>
+                    <th>
+                        countryName
+                    </th>
+                    <th>
+                        languageName
+                    </th>
+                    <th>
+                        createdDate
+                    </th>
+                    <th>
+                        active
+
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            
+        </table>
+        <div id="addModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Modal Header</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+
+                            <label>CountryName </label><br />
+                            <input type="text" name="CountryeName" id="CountryeName"><br />
+
+                            <label>languageName</label><br />
+                            <input type="text" name="languageName" id="languageName"><br />
+
+
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" id="ADDCountry" class="btn btn-primary" data-dismiss="modal">ADDCountry</button>
+
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div id="myModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Modal Header</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+
+                            <label>CountryeName</label><br />
+                            <input type="text" name="CounName" id="CounName"><br />
+                            <label>languageeName </label><br />
+                            <input type="text" name="langName" id="langName"><br />
+                          
+
+
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" id="EditCountry" class="btn btn-primary" data-dismiss="modal">EditCountry</button>
+
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div id="ConfirmmyModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Modal Header</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            You Are Sure To Delete,,?
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" id="DeleteCountry" class="btn btn-danger" data-dismiss="modal">Delete</button>
+
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+    <script>
+        
+        var countryId;
+        function getCountrybyId(id) {
+            countryId = id;
+            $.ajax({
+               
+                url: " https://demotestapi.catalist-me.com/api/Country/GetAllCountries?CountryId=" + countryId,
+                type: "GET",
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization",
+                        "Bearer " + localStorage.getItem("token"));
+                },
+
+                dataType: "json",
+                success: function (data) {
+                   // var x = data.response.countries;
+                   
+                 
+                    //$("#countryId").val(x.id);
+                    //$("#CountryeName").val(x.countryName);
+                    //$("#languageName").val(x.languageName);
+                    //$("#active").val(x.active);
+                  
+                },
+                error: function () {
+                  //  alert("Try Fix Error ");
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            $("#logout").click(function () {
+                localStorage.removeItem("token");
+                $("#response").html("<h2>User successfully logged out.</h2 > ");
+                $(location).attr('href', 'http://localhost:55695/Home/Login');
+            });
+            function showData() {
+                
+                var options = {};
+                options.url = "https://demotestapi.catalist-me.com/api/Country/GetAllCountries?CountryId=0";
+                options.type = "GET";
+                options.beforeSend = function (request) {
+                    request.setRequestHeader("Authorization",
+                        "Bearer " + localStorage.getItem("token"));
+                };
+                options.dataType = "json";
+                options.success = function (data) {
+                    console.log(data.response.countries);
+                    $('#tb1').DataTable({
+                        data:data.response.countries,
+                        columns: [
+                            { "data": "id" },
+                            { "data": "countryName" },
+                            { "data": "languageName" },
+                            { "data": "createdDate" },
+                            { "data": "active" },
+                           
+                             {
+                                 data: null,
+                                 targets: 1,
+                                 render: function (data) {
+                                    return '<button onClick="getCountrybyId(id)" id=' + data.id + '  class="btn btn-outline-dark" data-toggle="modal" data-target="#myModal">Edit</button>    <button onClick="getCountrybyId(id)" id=' + data.id + '  class="btn btn-outline-danger" data-toggle="modal" data-target="#ConfirmmyModal">Delete</button>';
+
+                                }
+                            },
+                           
+            
+                            
+                        ]
+                    });  
+                    //data.response.countries.forEach(function (countries) {
+                    //    $("#tb").append("<tbody id='tb'>"+
+                    //     "<tr>" +
+                    //        "<td>" + countries.id + "</td>" +
+                    //        "<td>" + countries.countryName + "</td>" +
+                    //        "<td>" + countries.languageName + "</td>" +
+                    //        "<td>" + countries.createdDate + "</td>" +
+                    //        "<td>" + countries.active + "</td>" +
+                    //        "<td> <button id=" + countries.id + " onClick='getCountrybyId(id)' class='btn btn-outline-dark' data-toggle='modal' data-target='#myModal'>Edit</button></td>" +
+                    //        "<td> <button id=" + countries.id + "  onClick='getCountrybyId(id)' class='btn btn-outline-danger' data-toggle='modal' data-target='#ConfirmmyModal' >Delete</button></td>" +
+                    //        "</tr>"+"</tbody> ");
+                    //});
+                };
+                options.error = function () {
+                    $("#response").html("<h2>Error while calling the Web API!</h2> ");
+                };
+                $.ajax(options);
+              
+            };
+            showData();
+            $("#ADDCountry").click(function () {
+                var table = $('#tb1').DataTable();
+                var CountryeName = $('#CountryeName').val();
+                var languageName = $('#languageName').val();
+                var options = {};
+                options.url = "https://demotestapi.catalist-me.com/api/Country/AddCountry";
+                options.type = "POST";
+                var obj = {};
+                obj.countryName = CountryeName;
+                obj.languageName = languageName;
+                options.beforeSend = function (request) {
+                    request.setRequestHeader("Authorization",
+                        "Bearer " + localStorage.getItem("token"));
+                };
+                options.data = JSON.stringify(obj);
+                options.contentType = "application/json";
+                options.dataType = "json";
+                options.accept = "text / plain";
+                options.success = function (data) {
+                    console.log(data);
+                    toastr.success('Added success!');
+                 //  $('#tb1').dataTable().row.add().draw();
+                    table.clear().draw();
+                    $(location).attr('href', 'http://localhost:55695/Home');
+                    
+                };
+                options.error = function () {
+                    $("#response").html("<h2>Error while calling the Web API!</h2 > ");
+                };
+                $.ajax(options);
+                console.log(options);
+                
+
+            });
+            $("#EditCountry").click(function () {
+                var x = $("button");
+
+                console.log(x); 
+                var countryName = $("#CounName").val();
+                var languageName = $("#langName").val();
+                var countryID = parseInt(countryId);
+                var active = true; 
+                var options = {};
+
+                options.url = "https://demotestapi.catalist-me.com/api/Country/UpdateCountry";
+
+                options.type = "POST";
+
+                var obj = {};
+                obj.countryName = countryName;
+                obj.languageName = languageName;
+                obj.countryID = countryID;
+                obj.active = active;
+                options.beforeSend = function (request) {
+                    request.setRequestHeader("Authorization",
+                        "Bearer " + localStorage.getItem("token"));
+                };
+                console.log(  JSON.stringify(obj));
+                options.data = JSON.stringify(obj);
+                options.contentType = "application/json";
+                options.dataType = "json";
+
+                options.success = function () {
+                    toastr.success('Edited success!');
+                    $(location).attr('href', 'http://localhost:55695/Home');
+                };
+                options.error = function () {
+                    $("#response").html("<h2>Error while calling the Web API!</h2 > ");
+                };
+                $.ajax(options);
+            });
+            $("#DeleteCountry").click(function () {
+            
+                var table = $('#tb1').DataTable();
+
+                $.ajax({
+                   
+                    url: " https://demotestapi.catalist-me.com/api/Country/DeleteCountry?CountryID=" + countryId,
+                    type: "DELETE",
+                    beforeSend: function (request) {
+                        request.setRequestHeader("Authorization",
+                            "Bearer " + localStorage.getItem("token"));
+                    },
+
+                    success: function () {
+                        console.log(table);
+                        table.row().remove().draw();
+                      
+                        //btn.parents("tr").remove();
+                     
+                        toastr.success('Deleted!');
+                        $(location).attr('href', 'http://localhost:55695/Home');
+
+                    },
+                    error: function () {
+                       toastr.error('Something went wrong!');
+
+                     
+                    }
+                });
+
+            });
+        });
+    </script>
+</body>
+
+</html>
